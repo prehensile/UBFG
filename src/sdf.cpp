@@ -246,7 +246,7 @@ QImage dfcalculate_bruteforce(QImage &img, bool transparent = false)
         for(short x = 0; x < w; x++)
         {
             if(qGreen(img.pixel(x, y)) > 128)
-                cache.append({x,y});
+	      cache.append(QPair<short, short>(x,y));
         }
     }
     uchar *data  = result.bits();

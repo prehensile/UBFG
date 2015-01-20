@@ -7,10 +7,11 @@ HEADERS += ../src/sdf.h \
     sdf-gen.h
 
 CONFIG += console
+CONFIG -= app_bundle
 TEMPLATE = app
 
 RESOURCES = sdf-gen.qrc
-TRANSLATIONS = ru.ts
+CONFIG(with_ru_ts): TRANSLATIONS = ru.ts
 
 .SUFFIXES.depends = .ts .qm
 .ts.qm.commands = lrelease -qm $@ $<

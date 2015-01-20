@@ -1,6 +1,3 @@
-# -------------------------------------------------
-# Project created by QtCreator 2011-05-28T21:40:19
-# -------------------------------------------------
 TARGET = UBFG
 
 QT_VERSION=$$[QT_VERSION]
@@ -31,3 +28,6 @@ HEADERS += mainwindow.h \
 FORMS += mainwindow.ui
 QMAKE_CXXFLAGS -= -fopenmp
 QMAKE_LDFLAGS += -fopenmp
+ICON = ../app.icns
+
+include("../third/qctemplatelib/qctemplatelib.pri")

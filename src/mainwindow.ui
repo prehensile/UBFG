@@ -42,6 +42,10 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
+       <attribute name="icon">
+        <iconset resource="res/res.qrc">
+         <normaloff>:/font.svg</normaloff>:/font.svg</iconset>
+       </attribute>
        <attribute name="title">
         <string>Fonts setup</string>
        </attribute>
@@ -682,6 +686,36 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Multisample:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinFontSize">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>8</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QListWidget" name="listOfFonts">
           <item>
            <property name="text">
@@ -738,6 +772,16 @@
           </property>
           <property name="checked">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="allowRotate">
+          <property name="toolTip">
+           <string>Allow for rotating in glyph layout</string>
+          </property>
+          <property name="text">
+           <string>Allow for rotate</string>
           </property>
          </widget>
         </item>
@@ -1014,6 +1058,10 @@
        </layout>
       </widget>
       <widget class="QWidget" name="tab_3">
+       <attribute name="icon">
+        <iconset resource="res/res.qrc">
+         <normaloff>:/folder.svg</normaloff>:/folder.svg</iconset>
+       </attribute>
        <attribute name="title">
         <string>Export</string>
        </attribute>
@@ -1247,14 +1295,20 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QPushButton" name="pushButton_6">
+            <widget class="QPushButton" name="saveProject">
+             <property name="toolTip">
+              <string>Save project's settings</string>
+             </property>
              <property name="text">
               <string>Save project as...</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_7">
+            <widget class="QPushButton" name="loadProject">
+             <property name="toolTip">
+              <string>Load project</string>
+             </property>
              <property name="text">
               <string>Load project...</string>
              </property>
@@ -1349,7 +1403,7 @@
            <x>0</x>
            <y>0</y>
            <width>560</width>
-           <height>679</height>
+           <height>636</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1393,6 +1447,36 @@
     </item>
    </layout>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>843</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_project"/>
+    <addaction name="actionSave_project"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuZoom">
+    <property name="title">
+     <string>Zoom</string>
+    </property>
+    <addaction name="action100"/>
+    <addaction name="action200"/>
+    <addaction name="action400"/>
+    <addaction name="action800"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuZoom"/>
+  </widget>
   <action name="actionExport">
    <property name="text">
     <string>Export</string>
@@ -1401,6 +1485,59 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionLoad_project">
+   <property name="text">
+    <string>Load project..</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_project">
+   <property name="text">
+    <string>Save project as...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="action100">
+   <property name="text">
+    <string>100%</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
+  </action>
+  <action name="action200">
+   <property name="text">
+    <string>200%</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="action400">
+   <property name="text">
+    <string>400%</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
+  </action>
+  <action name="action800">
+   <property name="text">
+    <string>800%</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+8</string>
    </property>
   </action>
  </widget>
@@ -1416,7 +1553,9 @@
    </slots>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>pushButton</sender>
@@ -1425,8 +1564,8 @@
    <slot>addFont()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>101</x>
-     <y>143</y>
+     <x>116</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
@@ -1441,8 +1580,8 @@
    <slot>bruteForce()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>126</x>
-     <y>746</y>
+     <x>141</x>
+     <y>686</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1457,8 +1596,8 @@
    <slot>removeFont()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
-     <y>143</y>
+     <x>249</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -1473,8 +1612,8 @@
    <slot>getFolder()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
-     <y>221</y>
+     <x>249</x>
+     <y>275</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -1489,8 +1628,8 @@
    <slot>exportFont()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>146</x>
-     <y>279</y>
+     <x>161</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1505,12 +1644,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>496</y>
+     <x>131</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>167</x>
-     <y>524</y>
+     <x>172</x>
+     <y>497</y>
     </hint>
    </hints>
   </connection>
@@ -1521,12 +1660,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
-     <y>496</y>
+     <x>202</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
-     <y>547</y>
+     <x>248</x>
+     <y>521</y>
     </hint>
    </hints>
   </connection>
@@ -1537,12 +1676,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>496</y>
+     <x>122</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>89</x>
-     <y>547</y>
+     <x>95</x>
+     <y>521</y>
     </hint>
    </hints>
   </connection>
@@ -1553,12 +1692,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>72</x>
-     <y>496</y>
+     <x>87</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>167</x>
-     <y>570</y>
+     <x>172</x>
+     <y>545</y>
     </hint>
    </hints>
   </connection>
@@ -1569,12 +1708,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>496</y>
+     <x>137</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>167</x>
-     <y>547</y>
+     <x>172</x>
+     <y>521</y>
     </hint>
    </hints>
   </connection>
@@ -1585,24 +1724,24 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>80</x>
-     <y>597</y>
+     <x>95</x>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
-     <y>597</y>
+     <x>249</x>
+     <y>568</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_7</sender>
+   <sender>loadProject</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>loadProject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>342</y>
+     <x>127</x>
+     <y>417</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1611,14 +1750,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_6</sender>
+   <sender>saveProject</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>saveProject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>242</x>
-     <y>342</y>
+     <x>246</x>
+     <y>383</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -1633,12 +1772,12 @@
    <slot>rescale(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>798</x>
-     <y>14</y>
+     <x>829</x>
+     <y>49</y>
     </hint>
     <hint type="destinationlabel">
-     <x>265</x>
-     <y>46</y>
+     <x>280</x>
+     <y>88</y>
     </hint>
    </hints>
   </connection>
@@ -1649,8 +1788,8 @@
    <slot>bitDepthChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>209</x>
-     <y>139</y>
+     <x>249</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -1665,8 +1804,8 @@
    <slot>changeFontColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>173</y>
+     <x>170</x>
+     <y>215</y>
     </hint>
     <hint type="destinationlabel">
      <x>-67</x>
@@ -1681,12 +1820,60 @@
    <slot>changeBkgColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>166</y>
+     <x>249</x>
+     <y>215</y>
     </hint>
     <hint type="destinationlabel">
      <x>-8</x>
      <y>168</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_project</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadProject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_project</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveProject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>371</y>
     </hint>
    </hints>
   </connection>

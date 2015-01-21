@@ -26,6 +26,7 @@ HEADERS += mainwindow.h \
     sdf.h \
     maxrects.h
 FORMS += mainwindow.ui
+RESOURCES += res/res.qrc
 QMAKE_CXXFLAGS -= -fopenmp
 QMAKE_LDFLAGS += -fopenmp
 ICON = ../app.icns

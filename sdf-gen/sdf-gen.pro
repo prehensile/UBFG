@@ -1,9 +1,12 @@
 TARGET = sdf-gen
 
+TOP = ..
+include("../UBFG.pri")
+
 SOURCES += sdf-gen.cpp \
-    ../src/sdf.cpp \
+    ../ubfg/sdf.cpp \
     main.cpp
-HEADERS += ../src/sdf.h \
+HEADERS += ../ubfg/sdf.h \
     sdf-gen.h
 
 CONFIG += console
@@ -20,5 +23,7 @@ QMAKE_EXTRA_TARGETS += .SUFFIXES .ts.qm
 "$(TARGET)".depends = $$replace(TRANSLATIONS, .ts, .qm)
 QMAKE_EXTRA_TARGETS += $(TARGET)
 
-QMAKE_CXXFLAGS += -fopenmp -std=c++0x
-QMAKE_LINK += -fopenmp
+enable_openmp {
+    QMAKE_CXXFLAGS += -fopenmp
+    QMAKE_LINK += -fopenmp
+}

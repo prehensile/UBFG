@@ -13,8 +13,10 @@
 #include <math.h>
 #include <limits>
 
-FontRender::FontRender(Ui_MainWindow *_ui) : ui(_ui)
-{}
+FontRender::FontRender(Ui_MainWindow *_ui) : ui(_ui), m_checkerSize(8)
+{
+    createChecker();
+}
 
 FontRender::~FontRender()
 {}
@@ -309,8 +311,15 @@ void FontRender::run()
     height = ui->textureH->value();
     points = packer.pack(&glyphLst, ui->comboHeuristic->currentIndex(), width, height);
     QImage texture(width, height, baseTxtrFormat);
-    texture.fill(bkgColor.rgba());
     QPainter p;
+    if (ui->transparent->isEnabled() && ui->transparent->isChecked() && bkgColor == Qt::transparent)
+    {
+        p.begin(&texture);
+        paintChecker(p, texture.rect());
+        p.end();
+    }
+    else
+        texture.fill(bkgColor.rgba());
     if(exporting)
     {
         // Some sort of unicode hack...
@@ -323,8 +332,16 @@ void FontRender::run()
         if(!ui->transparent->isChecked() || !ui->transparent->isEnabled())
             p.fillRect(0,0,texture.width(),texture.height(), bkgColor);
         for (i = 0; i < glyphLst.size(); ++i)
-            if(glyphLst.at(i).merged == false)
-                    p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);                   
+            if(glyphLst.at(i).merged == false) {
+                    p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);
+            }
+        if (ui->enableDebug->isChecked()) {
+            p.setPen(QPen(Qt::red));
+            for (i = 0; i < glyphLst.size(); ++i)
+                if(glyphLst.at(i).merged == false) {
+                    p.drawRect(glyphLst.at(i).rc); qDebug() << glyphLst.at(i).rc;
+                }
+        }
         p.end();
         // apply distance field calculations if selected
         if(distanceField)
@@ -355,6 +372,8 @@ void FontRender::run()
             result = outputXML(fontLst, texture);
         else if (ui->outputFormat->currentText().toLower() == QString("bmfont"))
             result = outputBMFont(fontLst, texture);
+        else if (ui->outputFormat->currentText().toLower() == QString("ftgl"))
+            result = outputFTGL(fontLst, texture);
         else
             result = outputFNT(fontLst, texture);
         // notify user
@@ -368,7 +387,15 @@ void FontRender::run()
         p.begin(&texture);
         for (i = 0; i < glyphLst.size(); i++)
             p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);
-
+        if (ui->enableDebug->isChecked()) {
+            QColor cl(Qt::blue); cl.setAlphaF(0.3);
+            QPen pen(cl);
+            pen.setWidth(0);
+            // QVector<qreal> dashes{1, 2}; pen.setDashPattern(dashes);
+            p.setPen(pen);
+            for (i = 0; i < glyphLst.size(); ++i)
+                p.drawRect(glyphLst.at(i).rc);
+        }
         p.end();  // end of drawing glyphs
         int percent = (int)(((float)packer.area / (float)width / (float)height) * 100.0f + 0.5f);
         float percent2 = (float)(((float)packer.neededArea / (float)width / (float)height) * 100.0f );
@@ -389,7 +416,24 @@ void FontRender::run()
         }
     }
     int nMilliseconds = myTimer.elapsed();
-    qDebug() << nMilliseconds;
+    qDebug() << Q_FUNC_INFO << nMilliseconds << "ms";
+}
+
+void FontRender::createChecker()
+{
+    QColor lightColor( Qt::lightGray ), darkColor( Qt::darkGray );
+    m_checker = QPixmap( 2*m_checkerSize, 2*m_checkerSize );
+    QPainter p(&m_checker);
+    p.fillRect(0, 0, m_checkerSize, m_checkerSize, lightColor);
+    p.fillRect(m_checkerSize, 0, m_checkerSize, m_checkerSize, darkColor);
+    p.fillRect(0, m_checkerSize, m_checkerSize, m_checkerSize, darkColor);
+    p.fillRect(m_checkerSize, m_checkerSize, m_checkerSize, m_checkerSize, lightColor);
+    p.end();
+}
+
+void FontRender::paintChecker( QPainter &painter, const QRectF &rect ) const
+{
+    painter.fillRect(rect, QBrush(m_checker));
 }
 
 unsigned int FontRender::qchar2ui(QChar ch)
@@ -402,6 +446,268 @@ unsigned int FontRender::qchar2ui(QChar ch)
     for(int j = 1; j < encodedString.size(); j++)
         chr = (chr << 8) + (unsigned char)encodedString.data()[j];
     return chr;
+}
+
+#define _ssprintf(...)					\
+    ({ int _ss_size = snprintf(0, 0, ##__VA_ARGS__);    \
+    char *_ss_ret = (char*)alloca(_ss_size+1);          \
+    snprintf(_ss_ret, _ss_size+1, ##__VA_ARGS__);       \
+    _ss_ret; })
+
+bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, const QImage& texture)
+{
+  // -------------
+  // Header
+  // -------------
+  output << 
+        "/* ============================================================================\n"
+        " * Freetype GL - A C OpenGL Freetype engine\n"
+        " * Platform:    Any\n"
+        " * WWW:         http://code.google.com/p/freetype-gl/\n"
+        " * ----------------------------------------------------------------------------\n"
+        " * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.\n"
+        " *\n"
+        " * Redistribution and use in source and binary forms, with or without\n"
+        " * modification, are permitted provided that the following conditions are met:\n"
+        " *\n"
+        " *  1. Redistributions of source code must retain the above copyright notice,\n"
+        " *     this list of conditions and the following disclaimer.\n"
+        " *\n"
+        " *  2. Redistributions in binary form must reproduce the above copyright\n"
+        " *     notice, this list of conditions and the following disclaimer in the\n"
+        " *     documentation and/or other materials provided with the distribution.\n"
+        " *\n"
+        " * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR\n"
+        " * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\n"
+        " * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO\n"
+        " * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,\n"
+        " * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
+        " * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
+        " * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
+        " * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+        " * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n"
+        " * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
+        " *\n"
+        " * The views and conclusions contained in the software and documentation are\n"
+        " * those of the authors and should not be interpreted as representing official\n"
+        " * policies, either expressed or implied, of Nicolas P. Rougier.\n"
+        " * ===============================================================================\n"
+        " */\n";
+
+
+  // ----------------------
+  // Structure declarations
+  // ----------------------
+  output << 
+        "#include <stddef.h>\n"
+        "#ifdef __cplusplus\n"
+        "extern \"C\" {\n"
+        "#endif\n"
+        "\n"
+        "typedef struct\n"
+        "{\n"
+        "    unsigned int charcode;\n"
+        "    float kerning;\n"
+        "} kerning_t;\n\n";
+
+  output << 
+        "typedef struct\n"
+        "{\n"
+        "    unsigned int charcode;\n"
+        "    unsigned int Id;\n"
+        "    int width, height;\n"
+        "    int offset_x, offset_y;\n"
+        "    float advance_x, advance_y;\n"
+        "    float s0, t0, s1, t1;\n"
+	"    int outline_type;\n"
+        "    float outline_thickness;\n"
+        "    size_t kerning_count;\n"
+        "    kerning_t kerning[];\n"
+        "} texture_glyph_t;\n\n";
+
+  output << _ssprintf(
+        "typedef struct\n"
+        "{\n"
+        "    size_t tex_width;\n"
+        "    size_t tex_height;\n"
+        "    size_t tex_depth;\n"
+        "    unsigned char tex_data[%d];\n"
+        "} texture_atlas_t;\n\n", texture.byteCount() );
+
+  output << 
+        "typedef struct\n"
+        "{\n"
+        "    const char *name;\n"
+        "    const char *family;\n"
+        "    const char *style;\n"
+	"    unsigned char fixedwidth, bold, italic;\n"
+        "    float size;\n"
+	"    int hinting;\n"
+	"    int outline_type;\n"
+	"    int filtering;\n"
+        "    unsigned char lcd_weights[5];\n"        
+        "    float height;\n"
+        "    float linegap;\n"
+        "    float ascender;\n"
+        "    float descender;\n"
+        "    float underline_position;\n"
+        "    float underline_thickness;\n"
+        "    size_t glyphs_count;\n"
+        "    texture_glyph_t glyphs[];\n"
+        "} texture_font_t;\n\n";
+
+
+    int index = 0;
+    QList<FontRec>::const_iterator fontRecIt;
+    for (fontRecIt = fontLst.begin(); fontRecIt != fontLst.end(); ++fontRecIt)
+    {
+      const char *base_name = fontRecIt->m_font.toLatin1();
+      const int font_size = fontRecIt->m_size;
+      size_t glyph_count = fontRecIt->m_glyphLst.size(), max_kerning_count = fontRecIt->m_kerningList.size();
+
+      const QFontMetrics &fmetrics = QFontMetrics(fontRecIt->m_qfont);
+      const QFontInfo &finfo = QFontInfo(fontRecIt->m_qfont);
+
+      // -------------------
+      // Texture information
+      // -------------------
+      output << _ssprintf(
+		 "struct {\n"
+		 "    const char *name;\n"
+		 "    const char *family;\n"
+		 "    const char *style;\n"
+		 "    unsigned char fixedwidth, bold, italic;\n"
+		 "    float size;\n"
+		 "    float height;\n"
+		 "    float linegap;\n"
+		 "    float ascender;\n"
+		 "    float descender;\n"
+		 "    size_t glyphs_count;\n"
+		 "    struct {\n"
+		 "      unsigned int charcode;\n"
+		 "      int width, height;\n"
+		 "      int x, y;\n"
+		 "      int offset_x, offset_y;\n"
+		 "      float advance_x, advance_y;\n"
+		 "      float s0, t0, s1, t1;\n"
+		 "      size_t kerning_count;\n"
+		 "      struct {\n"
+		 "        unsigned int charcode;\n"
+		 "        float kerning;\n"
+		 "      } kerning[%ld];\n"
+		 "    } glyphs[%ld];\n"
+		 "} %s_%dp = {\n", max_kerning_count, glyph_count, base_name, font_size );
+      output << _ssprintf(
+		 " \"%s\", \"%s\", \"%s\", %d, %d, %d, %d, %d, %d, %d, %d, %ld, \n", 
+		 base_name, finfo.family().toLatin1().constData(), finfo.styleName().toLatin1().constData(),
+		 finfo.fixedPitch(),
+		 fontRecIt->m_style & FontRec::BOLD,
+		 fontRecIt->m_style & FontRec::ITALIC,
+		 font_size, fmetrics.height(),
+		 fmetrics.lineSpacing(), fmetrics.ascent(), fmetrics.descent(),
+		 glyph_count );
+
+      // --------------
+      // Texture glyphs
+      // --------------
+      output << " {\n";
+
+      // Output each glyph record
+      QList<const packedImage*>::const_iterator chrItr;
+      for (chrItr = fontRecIt->m_glyphLst.begin(); chrItr != fontRecIt->m_glyphLst.end(); ++chrItr)
+      {
+	const packedImage *glyph = *chrItr;
+
+	if( (glyph->ch.unicode() == L'\'' ) || (glyph->ch.unicode() == L'\\' ) )
+	  output << _ssprintf( "  {'\\%lc', ", glyph->ch.unicode() );
+	else if( glyph->ch.unicode() == (wchar_t)(-1) )
+	  output << _ssprintf( "  {'\\0', " );
+	else
+	  if (glyph->ch.unicode() < 128)
+	    output << _ssprintf( "  {'%lc', ", glyph->ch.unicode() );
+	  else
+	    output << _ssprintf( "  {0x%04x, ", glyph->ch.unicode() );
+	output << _ssprintf( "%d, %d, ", glyph->crop.width(), glyph->crop.height() );
+	output << _ssprintf( "%d, %d, ", glyph->rc.x(), glyph->rc.y() );
+	output << _ssprintf( "%d, %d, ", glyph->crop.x(), glyph->crop.y() );
+	output << _ssprintf( "%d, %d, ", glyph->charWidth, glyph->rc.height() );
+	const float
+	  s0 = (glyph->rc.x() + glyph->crop.x()) / texture.width(),
+	  t0 = (glyph->rc.y() + glyph->crop.y()) / texture.height(),
+	  s1 = (glyph->rc.x() + glyph->crop.x() + glyph->crop.width()) / texture.width(),
+	  t1 = (glyph->rc.y() + glyph->crop.y() + glyph->crop.height()) / texture.height();
+	output << _ssprintf( "%ff, %ff, %ff, %ff, ", s0, t0, s1, t1 );
+
+	const QList<kerningPair> *kerningList = &fontRecIt->m_kerningList;
+	output << _ssprintf( "%d, ", kerningList->length() );
+	output << "{ ";
+	for( int i=0; i < kerningList->length(); ++i )
+	{
+	  if (kerningList->at(i).first == glyph->ch || kerningList->at(i).second == glyph->ch)
+	    {
+	      wchar_t charcode = (kerningList->at(i).first == glyph->ch)?kerningList->at(i).second.unicode():kerningList->at(i).first.unicode();
+	      if( (charcode == '\'' ) || (charcode == L'\\') )
+		output << _ssprintf( "{'\\%lc', %ff}", charcode, kerningList->at(i).kerning );
+	      else if( (charcode != (wchar_t)(-1) ) )
+		if (charcode < 128)
+		  output << _ssprintf( "{'%lc', %ff}", charcode, kerningList->at(i).kerning );
+		else
+		  output << _ssprintf( "{0x%04x, %ff}", charcode, kerningList->at(i).kerning );
+	      if( i < kerningList->length()-1)
+		output << ", ";
+	    }
+	  output << "} },\n";
+	}
+	output << " }\n};\n";
+      }
+    }
+
+    // ------------
+    // Texture data
+    // ------------
+    if(ui->saveImageInside->isChecked())
+    {
+        output << "texture_atlas_t texture = {\n";
+        output << _ssprintf( " %d, %d, %d, \n", texture.width(), texture.height(), texture.depth() );
+        output << " {";
+        const ulong texture_size = texture.byteCount();
+        for( int i=0; i < texture_size; i+= 32 )
+        {
+            for( int j=0; j < 32 && (j+i) < texture_size ; ++ j)
+            {
+                if( (j+i) < (texture_size-1) )
+                    output << _ssprintf( "%d,", texture.bits()[i+j] );
+                else
+                    output << _ssprintf( "%d", texture.bits()[i+j] );
+            }
+            if( (i+32) < texture_size )
+                output << "\n  ";
+        }
+        output << "}\n};\n";
+    }
+    
+    output << _ssprintf( "texture_font_t *%s_catalog[] = \n"
+			 "{\n", ui->outFile->text().toUtf8().constData() );
+    for (fontRecIt = fontLst.begin(); fontRecIt != fontLst.end(); ++fontRecIt)
+    {
+        const char *base_name = fontRecIt->m_font.toLatin1();
+        const int font_size = fontRecIt->m_size;
+        output << _ssprintf("  (texture_font_t*)&%s_%dp,\n", base_name, font_size);
+    }
+    output <<
+      "  NULL\n"
+      "};\n";
+    
+    output <<
+      "#ifdef __cplusplus\n"
+      "}\n"
+      "#endif\n";
+
+    qDebug() << _ssprintf( "Number of fonts            : %d\n", fontLst.size() );
+}
+
+bool FontRender::outputFTGL(const QList<FontRec>& fontLst, const QImage& texture)
+{
 }
 
 bool FontRender::outputFNT(const QList<FontRec>& fontLst, const QImage& texture)
@@ -520,7 +826,7 @@ bool FontRender::outputXML(const QList<FontRec>& fontLst, const QImage& texture)
         }
         fontStream << "\t</font>\n";
     }
-    if(ui->saveImageInsideXML->isChecked()){
+    if(ui->saveImageInside->isChecked()){
         QByteArray imgArray;
         QBuffer imgBuffer(&imgArray);
         imgBuffer.open(QIODevice::WriteOnly);
@@ -635,3 +941,87 @@ bool FontRender::outputBMFont(const QList<FontRec>& fontLst, const QImage& textu
     }
     return true;
 }
+
+bool FontRender::outputBMFontBin(const QList<FontRec>& fontLst, const QImage& texture)
+{
+    int index = 0;
+    QList<FontRec>::const_iterator fontRecIt;
+    for (fontRecIt = fontLst.begin(); fontRecIt != fontLst.end(); ++fontRecIt)
+    {
+        // create output file names
+        QString fntFileName = fontLst.size() > 1 ? fileName + "_" + QString::number(index++) + ".fnt" : fileName + ".fnt";
+        // attempt to make output font file
+        QFile fntFile(fntFileName);
+        if(!fntFile.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::critical(0, "Error", "Cannot create file " + fntFileName);
+            return false;
+        }
+        QDataStream fontStream(&fntFile);
+        fontStream.setByteOrder(QDataStream::LittleEndian);
+
+        //BMFont bin header
+        fontStream.writeRawData("BMF", 3);
+        fontStream << (quint8)3;
+
+        // output "info" block
+        QByteArray fontNameUtf8=fontRecIt->m_font.toUtf8();
+        fontNameUtf8.append('\0');
+        const quint32 infoBlockSize=14+fontNameUtf8.length();
+        quint8 infoBitField=(fontRecIt->m_style & FontRec::SMOOTH? 1: 0); //smooth
+        infoBitField|=1 << 1; //unicode
+        infoBitField|=(fontRecIt->m_style & FontRec::ITALIC? 1: 0) << 2; //italic
+        infoBitField|=(fontRecIt->m_style & FontRec::BOLD? 1: 0) << 3; //bold
+
+        fontStream << (quint8)1 << infoBlockSize
+                      << (quint16)fontRecIt->m_size << infoBitField << (quint8)0 << (quint16)100 << (quint8)1
+                      << (quint8)packer.borderTop << (quint8)packer.borderRight <<
+                         (quint8)packer.borderBottom << (quint8)packer.borderLeft
+                      << (quint8)0 << (quint8)0 << (quint8)0;
+        fontStream.writeRawData(fontNameUtf8.data(), fontNameUtf8.length());
+
+        // output "common" block
+        QFontMetrics fontMetrics(fontRecIt->m_qfont);
+        const bool transparent=ui->transparent->isEnabled() && ui->transparent->isChecked();
+        fontStream << (quint8)2 << (quint32)15 //header
+                   << (quint16)fontMetrics.height() << (quint16)fontMetrics.ascent()
+                   << (quint16)texture.width() << (quint16)texture.height() << (quint16)1 << (quint8)(0<<7)
+                   << (transparent? 0x00040404: 0x04000000);
+
+        // output "page" block
+        QByteArray imageFileNameUtf8=(ui->outFile->text()+"."+imageExtension).toUtf8();
+        imageFileNameUtf8.append('\0');
+        fontStream << (quint8)3 << imageFileNameUtf8.length();
+        fontStream.writeRawData(imageFileNameUtf8.data(), imageFileNameUtf8.length());
+
+        // output "chars" block
+        fontStream << (quint8)4 << fontRecIt->m_glyphLst.size()*20;
+        for(const auto pGlyph: fontRecIt->m_glyphLst)
+        {
+            quint32 id=pGlyph->ch.unicode();
+            quint16 x=(quint16)pGlyph->rc.x(), y=(quint16)pGlyph->rc.y();
+            quint16 w=(quint16)pGlyph->img.width(), h=(quint16)pGlyph->img.height();
+            qint16 offsetX=(qint16)(pGlyph->crop.x()+pGlyph->bearing-(int)packer.borderLeft);
+            qint16 offsetY=(qint16)(pGlyph->crop.y()-(int)packer.borderTop);
+            qint16 xadvance=(qint16)pGlyph->charWidth;
+            quint8 page=0, chnl=15;
+            fontStream << id << x << y << w << h << offsetX << offsetY <<
+                          xadvance << page << chnl;
+        }
+        if(fontRecIt->m_kerningList.length()>0)
+        {
+            // output "kernings" block
+            fontStream << (quint8)5 << fontRecIt->m_kerningList.length()*10;
+            for (const auto kp: fontRecIt->m_kerningList)
+                fontStream << (quint32)kp.first.unicode() << (quint32)kp.second.unicode() << (qint16)kp.kerning;
+        }
+    }
+    /* output font texture */
+    if(!texture.save(imageFileName, qPrintable(ui->outFormat->currentText())))
+    {
+        QMessageBox::critical(0, "Error", "Cannot save image " + imageFileName);
+        return false;
+    }
+    return true;
+}
+

@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QImage>
+
 class FontView : public QWidget
 {
 Q_OBJECT
@@ -15,7 +16,7 @@ protected:
 private:
     QPixmap texture;
     int scale;
-private slots:
+private Q_SLOTS:
     void updatePixmap(const QImage &image);
     void rescale(int);
 };

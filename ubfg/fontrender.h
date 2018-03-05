@@ -5,7 +5,6 @@
 #include <QImage>
 #include <QPainter>
 #include <QList>
-//#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "imagepacker.h"
 
@@ -45,7 +44,7 @@ private:
             ITALIC = 0x4
         };
         FontRec(const QString& name, int size, Metric metric, int style)
-            : m_font(name), m_size(size), m_metric(metric), m_style(style)
+	: m_font(name), m_size(size), m_metric(metric), m_style(style)
         {}
         inline static Metric GetMetric(const QString& postfix) {
             return (postfix == "pt") ? POINTS : PIXELS;
@@ -72,17 +71,25 @@ private:
         QList<kerningPair> m_kerningList;
     };
 
+    bool outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, const QImage& texture);
+    bool outputFTGL(const QList<FontRec>& fontLst, const QImage& texture);
     bool outputFNT(const QList<FontRec>& fontLst, const QImage& texture);
     bool outputXML(const QList<FontRec>& fontLst, const QImage& texture);
     bool outputBMFont(const QList<FontRec>& fontLst, const QImage& texture);
+    bool outputBMFontBin(const QList<FontRec>& fontLst, const QImage& texture);
     unsigned int qchar2ui(QChar ch);
     QImage texture;
     QList<QImage> glyphs;
     QObject p;
     Ui_MainWindow *ui;
     ImagePacker packer;
-public slots:
+public Q_SLOTS:
     void run();
+private:
+    void createChecker();
+    void paintChecker( QPainter &painter, const QRectF &rect ) const;
+    QPixmap m_checker;
+    int m_checkerSize;
 };
 
 #endif // FONTRENDER_H

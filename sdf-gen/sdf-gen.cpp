@@ -1,6 +1,6 @@
 #include <QtCore>
 #include "sdf-gen.h"
-#include "../src/sdf.h"
+#include "../ubfg/sdf.h"
 
 SDFGenerator::SDFGenerator(int & argc, char ** argv):QCoreApplication(argc, argv)
 {

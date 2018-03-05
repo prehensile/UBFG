@@ -6,7 +6,7 @@ ImagePacker::ImagePacker()
 }
 
 //pack images, return list of positions
-QList<QPoint> ImagePacker::pack(QList<packedImage> *im, int heur, uint w, uint h)
+QList<QPoint> ImagePacker::pack(QList<packedImage> *im, int heur, uint w, uint h, bool allowRotate)
 {
     int i, j, x, y;
     QList<packedImage*> images;

@@ -1,11 +1,19 @@
 /* http://www.codersnotes.com/algorithms/signed-distance-fields */
 
-#include <QImage>
-#include <QTime>
-#include <QDebug>
-#include <math.h>
+#include <QtCore>
+#include "sdf.h"
 
-#define MULTIPLER 8
+SDF::SDF(const QString & fileName, const char * format) : 
+    QImage(fileName, format), 
+    method(METHOD_4SED), 
+    scale(1), 
+    sdf(size(), QImage::Format_Indexed8)
+{
+    for(int i = 0; i < 256; i++)
+    {
+        sdf.setColor(i, qRgb(i, i, i));
+    }
+}
 
 struct Point
 {
@@ -26,6 +34,7 @@ struct Grid
         delete[] grid;
     }
 };
+
 static const Point pointInside = { 0, 0, 0 };
 static const Point pointEmpty = { SHRT_MAX, SHRT_MAX, INT_MAX/2 };
 
@@ -69,6 +78,10 @@ static inline void Compare(Grid &g, int x, int y, int offsetx, int offsety)
     }
 }
 
+#define COMPARE(offsetx, offsety) Compare(g, x, y, offsetx, offsety)
+
+#define CLAMP(x, a, b) ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
+
 static void Generate8SED(Grid &g)
 {
     /* forward scan */
@@ -76,14 +89,14 @@ static void Generate8SED(Grid &g)
     {
         for(int x = 1; x <= g.w; x++)
         {
-            Compare(g, x, y,  0, -1);
-            Compare(g, x, y, -1,  0);
-            Compare(g, x, y, -1, -1);
+            COMPARE( 0, -1);
+            COMPARE(-1,  0);
+            COMPARE(-1, -1);
         }
         for(int x = g.w; x >= 0; x--)
         {
-            Compare(g, x, y,  1,  0);
-            Compare(g, x, y,  1, -1);
+            COMPARE( 1,  0);
+            COMPARE( 1, -1);
         }
     }
 
@@ -92,14 +105,14 @@ static void Generate8SED(Grid &g)
     {
         for(int x = 1; x <= g.w; x++)
         {
-            Compare(g, x, y,  0,  1);
-            Compare(g, x, y, -1,  0);
-            Compare(g, x, y, -1,  1);
+            COMPARE( 0,  1);
+            COMPARE(-1,  0);
+            COMPARE(-1,  1);
         }
         for(int x = g.w - 1; x > 0; x--)
         {
-            Compare(g, x, y,  1,  0);
-            Compare(g, x, y,  1,  1);
+            COMPARE( 1,  0);
+            COMPARE( 1,  1);
         }
     }
 }
@@ -110,12 +123,12 @@ static void Generate4SED(Grid &g)
     {
         for(int x = 1; x <= g.w; x++)
         {
-            Compare(g, x, y,  0, -1);
-            Compare(g, x, y, -1,  0);
+            COMPARE( 0, -1);
+            COMPARE(-1,  0);
         }
         for(int x = g.w - 1; x > 0; x--)
         {
-            Compare(g, x, y,  1,  0);
+            COMPARE( 1,  0);
         }
     }
 
@@ -124,26 +137,19 @@ static void Generate4SED(Grid &g)
     {
         for(int x = 1; x <= g.w; x++)
         {
-            Compare(g, x, y,  0,  1);
-            Compare(g, x, y, -1,  0);
+            COMPARE( 0,  1);
+            COMPARE(-1,  0);
         }
         for(int x = g.w - 1; x > 0; x--)
         {
-            Compare(g, x, y,  1,  0);
+            COMPARE( 1,  0);
         }
     }
 }
 
-
-
-QImage dfcalculate(QImage &img)
+void SDF::calculate_sed(int method)
 {
-    int w = img.width(), h = img.height();
-    QImage result(w, h, QImage::Format_Indexed8);
-    for(int i = 0; i < 256; i++)
-    {
-        result.setColor(i, qRgb(i,i,i));
-    }
+    int w = width(), h = height();
     Grid grid(w, h);
     /* create 1-pixel gap */
     for(int x = 0; x < w + 2; x++)
@@ -151,8 +157,8 @@ QImage dfcalculate(QImage &img)
         Put(grid, x, 0, pointEmpty);
         Put(grid, x, h + 1, pointEmpty);
     }
-    uchar *data = img.bits();
-    uchar pixel = img.bytesPerLine() / w;
+    uchar *data = bits();
+    uchar pixel = bytesPerLine() / w;
     #pragma omp parallel for
     for(int y = 1; y <= h; y++)
     {
@@ -170,42 +176,36 @@ QImage dfcalculate(QImage &img)
         }
         Put(grid, w + 1, y, pointEmpty);
     }
-    Generate4SED(grid);
-    data  = result.bits();
+    if(method == METHOD_4SED)
+        Generate4SED(grid);
+    else
+        Generate8SED(grid);
+    data  = sdf.bits();
     #pragma omp parallel for
     for(int y = 1; y <= h; y++)
     {
         for(int x = 1; x <= w; x++)
         {
-            float dist2 = sqrtf((float)Get(grid, x, y).f);
-            quint8 c = dist2 * MULTIPLER;
-            data[(y - 1) * w + (x - 1)] = c;
+            qreal dist2 = qSqrt((qreal)Get(grid, x, y).f);
+            int c = dist2 * scale;
+            data[(y - 1) * w + (x - 1)] = CLAMP(c, 0, 255);
         }
     }
-    return result;
 }
 
-#include <QPair>
-#include <QVector>
-
-QImage dfcalculate_bruteforce(QImage &img)
+void SDF::calculate_bruteforce()
 {
-    int w = img.width(), h = img.height();
-    QImage result(w, h, QImage::Format_Indexed8);
-    for(int i = 0; i < 256; i++)
-    {
-        result.setColor(i, qRgb(i,i,i));
-    }
+    int w = width(), h = height();
     QVector< QPair<short, short> > cache;
     for(short y = 0; y < h; y++)
     {
         for(short x = 0; x < w; x++)
         {
-            if(qGreen(img.pixel(x, y)) > 128)
+            if(qGreen(pixel(x, y)) > 128)
                 cache.append({x,y});
         }
     }
-    uchar *data  = result.bits();
+    uchar *data  = sdf.bits();
     #pragma omp parallel for
     for(short y = 0; y < h; y++)
     {
@@ -222,9 +222,24 @@ QImage dfcalculate_bruteforce(QImage &img)
                     min = d;
                 }
             }
-            quint8 c = sqrtf(min) * MULTIPLER;
-            data[y * w + x] = c;
+            int c = sqrtf(min) * scale;
+            data[y * w + x] = CLAMP(c, 0, 255);
         }
     }
-    return result;
+}
+QImage *SDF::calculate()
+{
+    switch(method)
+    {
+        case METHOD_BRUTEFORCE:
+            calculate_bruteforce();
+            break;
+        case METHOD_4SED:
+            calculate_sed(method);
+            break;
+        case METHOD_8SED:
+            calculate_sed(method);
+            break;
+    }
+    return &sdf;
 }

@@ -335,13 +335,6 @@ void FontRender::run()
             if(glyphLst.at(i).merged == false) {
                     p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);
             }
-        if (ui->enableDebug->isChecked()) {
-            p.setPen(QPen(Qt::red));
-            for (i = 0; i < glyphLst.size(); ++i)
-                if(glyphLst.at(i).merged == false) {
-                    p.drawRect(glyphLst.at(i).rc); qDebug() << glyphLst.at(i).rc;
-                }
-        }
         p.end();
         // apply distance field calculations if selected
         if(distanceField)
@@ -372,6 +365,8 @@ void FontRender::run()
             result = outputXML(fontLst, texture);
         else if (ui->outputFormat->currentText().toLower() == QString("bmfont"))
             result = outputBMFont(fontLst, texture);
+        else if (ui->outputFormat->currentText().toLower() == QString("bmfont (binary)"))
+            result = outputBMFontBin(fontLst, texture);
         else if (ui->outputFormat->currentText().toLower() == QString("ftgl"))
             result = outputFTGL(fontLst, texture);
         else
@@ -388,7 +383,7 @@ void FontRender::run()
         for (i = 0; i < glyphLst.size(); i++)
             p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);
         if (ui->enableDebug->isChecked()) {
-            QColor cl(Qt::blue); cl.setAlphaF(0.3);
+            QColor cl(Qt::magenta); cl.setAlphaF(0.5);
             QPen pen(cl);
             pen.setWidth(0);
             // QVector<qreal> dashes{1, 2}; pen.setDashPattern(dashes);
@@ -616,49 +611,49 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
       QList<const packedImage*>::const_iterator chrItr;
       for (chrItr = fontRecIt->m_glyphLst.begin(); chrItr != fontRecIt->m_glyphLst.end(); ++chrItr)
       {
-	const packedImage *glyph = *chrItr;
+        const packedImage *glyph = *chrItr;
 
-	if( (glyph->ch.unicode() == L'\'' ) || (glyph->ch.unicode() == L'\\' ) )
-	  output << _ssprintf( "  {'\\%lc', ", glyph->ch.unicode() );
-	else if( glyph->ch.unicode() == (wchar_t)(-1) )
-	  output << _ssprintf( "  {'\\0', " );
-	else
-	  if (glyph->ch.unicode() < 128)
-	    output << _ssprintf( "  {'%lc', ", glyph->ch.unicode() );
-	  else
-	    output << _ssprintf( "  {0x%04x, ", glyph->ch.unicode() );
-	output << _ssprintf( "%d, %d, ", glyph->crop.width(), glyph->crop.height() );
-	output << _ssprintf( "%d, %d, ", glyph->rc.x(), glyph->rc.y() );
-	output << _ssprintf( "%d, %d, ", glyph->crop.x(), glyph->crop.y() );
-	output << _ssprintf( "%d, %d, ", glyph->charWidth, glyph->rc.height() );
-	const float
-	  s0 = (glyph->rc.x() + glyph->crop.x()) / texture.width(),
-	  t0 = (glyph->rc.y() + glyph->crop.y()) / texture.height(),
-	  s1 = (glyph->rc.x() + glyph->crop.x() + glyph->crop.width()) / texture.width(),
-	  t1 = (glyph->rc.y() + glyph->crop.y() + glyph->crop.height()) / texture.height();
-	output << _ssprintf( "%ff, %ff, %ff, %ff, ", s0, t0, s1, t1 );
+        if( (glyph->ch.unicode() == L'\'' ) || (glyph->ch.unicode() == L'\\' ) )
+            output << _ssprintf( "  {'\\%lc', ", glyph->ch.unicode() );
+        else if( glyph->ch.unicode() == (wchar_t)(-1) )
+            output << _ssprintf( "  {'\\0', " );
+        else
+            if (glyph->ch.unicode() < 128)
+                output << _ssprintf( "  {'%lc', ", glyph->ch.unicode() );
+            else
+                output << _ssprintf( "  {0x%04x, ", glyph->ch.unicode() );
+        output << _ssprintf( "%d, %d, ", glyph->crop.width(), glyph->crop.height() );
+        output << _ssprintf( "%d, %d, ", glyph->rc.x(), glyph->rc.y() );
+        output << _ssprintf( "%d, %d, ", glyph->crop.x(), glyph->crop.y() );
+        output << _ssprintf( "%d, %d, ", glyph->charWidth, glyph->rc.height() );
+        const float
+        s0 = (glyph->rc.x() + glyph->crop.x()) / texture.width(),
+        t0 = (glyph->rc.y() + glyph->crop.y()) / texture.height(),
+        s1 = (glyph->rc.x() + glyph->crop.x() + glyph->crop.width()) / texture.width(),
+        t1 = (glyph->rc.y() + glyph->crop.y() + glyph->crop.height()) / texture.height();
+        output << _ssprintf( "%ff, %ff, %ff, %ff, ", s0, t0, s1, t1 );
 
-	const QList<kerningPair> *kerningList = &fontRecIt->m_kerningList;
-	output << _ssprintf( "%d, ", kerningList->length() );
-	output << "{ ";
-	for( int i=0; i < kerningList->length(); ++i )
-	{
-	  if (kerningList->at(i).first == glyph->ch || kerningList->at(i).second == glyph->ch)
-	    {
-	      wchar_t charcode = (kerningList->at(i).first == glyph->ch)?kerningList->at(i).second.unicode():kerningList->at(i).first.unicode();
-	      if( (charcode == '\'' ) || (charcode == L'\\') )
-		output << _ssprintf( "{'\\%lc', %ff}", charcode, kerningList->at(i).kerning );
-	      else if( (charcode != (wchar_t)(-1) ) )
-		if (charcode < 128)
-		  output << _ssprintf( "{'%lc', %ff}", charcode, kerningList->at(i).kerning );
-		else
-		  output << _ssprintf( "{0x%04x, %ff}", charcode, kerningList->at(i).kerning );
-	      if( i < kerningList->length()-1)
-		output << ", ";
-	    }
-	  output << "} },\n";
-	}
-	output << " }\n};\n";
+        const QList<kerningPair> *kerningList = &fontRecIt->m_kerningList;
+        output << _ssprintf( "%d, ", kerningList->length() );
+        output << "{ ";
+        for( int i=0; i < kerningList->length(); ++i )
+        {
+            if (kerningList->at(i).first == glyph->ch || kerningList->at(i).second == glyph->ch)
+            {
+                wchar_t charcode = (kerningList->at(i).first == glyph->ch)?kerningList->at(i).second.unicode():kerningList->at(i).first.unicode();
+                if( (charcode == '\'' ) || (charcode == L'\\') )
+                    output << _ssprintf( "{'\\%lc', %ff}", charcode, kerningList->at(i).kerning );
+                else if( (charcode != (wchar_t)(-1) ) )
+                    if (charcode < 128)
+                        output << _ssprintf( "{'%lc', %ff}", charcode, kerningList->at(i).kerning );
+                    else
+                        output << _ssprintf( "{0x%04x, %ff}", charcode, kerningList->at(i).kerning );
+                if( i < kerningList->length()-1)
+                    output << ", ";
+            }
+            output << "} },\n";
+        }
+        output << " }\n};\n";
       }
     }
 
@@ -703,11 +698,24 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
       "}\n"
       "#endif\n";
 
-    qDebug() << _ssprintf( "Number of fonts            : %d\n", fontLst.size() );
+    qDebug() << "Number of exported fonts: " << fontLst.size();
+
+    return true;
 }
 
 bool FontRender::outputFTGL(const QList<FontRec>& fontLst, const QImage& texture)
 {
+    // create output file names
+    QString fntFileName = fileName + ".h";
+    // attempt to make output font file
+    QFile fntFile(fntFileName);
+    if (!fntFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QMessageBox::critical(0, "Error", "Cannot create file " + fntFileName);
+        return false;
+    }
+    QTextStream fontStream(&fntFile);
+    return outputFTGL(fontStream, fontLst, texture);
 }
 
 bool FontRender::outputFNT(const QList<FontRec>& fontLst, const QImage& texture)

@@ -43,7 +43,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="icon">
@@ -1360,6 +1360,16 @@
               <string>BMFont</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>BMFont (binary)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FTGL</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -1562,7 +1572,7 @@
        <attribute name="title">
         <string>Atlas</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
          <number>2</number>
         </property>
@@ -1576,134 +1586,124 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
-           <number>4</number>
-          </property>
-          <property name="leftMargin">
+         <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,0,0">
+          <property name="topMargin">
            <number>0</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,0,0">
-            <property name="topMargin">
+           <widget class="QLabel" name="preview">
+            <property name="text">
+             <string>Preview</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="enableDebug">
+            <property name="text">
+             <string>debug</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="zoomLevel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="currentIndex">
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="preview">
-              <property name="text">
-               <string>Preview</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="enableDebug">
-              <property name="text">
-               <string>debug</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <item>
-               <property name="text">
-                <string>100%</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>200%</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>400%</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>800%</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QScrollArea" name="scrollArea">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>548</width>
-               <height>740</height>
-              </rect>
+             <property name="text">
+              <string>100%</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="FontView" name="widget" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>1</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </widget>
+            </item>
+            <item>
+             <property name="text">
+              <string>200%</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>400%</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>800%</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>550</width>
+             <height>744</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="FontView" name="widget" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1711,11 +1711,24 @@
        <attribute name="title">
         <string>Text</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QTextBrowser" name="textBrowser"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tabPreview">
        <attribute name="title">
         <string>Test</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,0">
+        <item>
+         <widget class="QOpenGLWidget" name="openGLWidget"/>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -1848,8 +1861,8 @@
    <slot>bruteForce()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>729</y>
+     <x>151</x>
+     <y>818</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1864,8 +1877,8 @@
    <slot>getFolder()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>275</y>
+     <x>42</x>
+     <y>85</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -1880,8 +1893,8 @@
    <slot>exportFont()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>333</y>
+     <x>114</x>
+     <y>66</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -1896,12 +1909,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>146</x>
-     <y>485</y>
+     <x>161</x>
+     <y>520</y>
     </hint>
     <hint type="destinationlabel">
-     <x>172</x>
-     <y>540</y>
+     <x>175</x>
+     <y>595</y>
     </hint>
    </hints>
   </connection>
@@ -1912,12 +1925,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>485</y>
+     <x>232</x>
+     <y>520</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
-     <y>564</y>
+     <x>253</x>
+     <y>619</y>
     </hint>
    </hints>
   </connection>
@@ -1928,12 +1941,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>485</y>
+     <x>152</x>
+     <y>520</y>
     </hint>
     <hint type="destinationlabel">
-     <x>95</x>
-     <y>564</y>
+     <x>97</x>
+     <y>619</y>
     </hint>
    </hints>
   </connection>
@@ -1944,12 +1957,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>102</x>
-     <y>485</y>
+     <x>117</x>
+     <y>520</y>
     </hint>
     <hint type="destinationlabel">
-     <x>172</x>
-     <y>588</y>
+     <x>175</x>
+     <y>643</y>
     </hint>
    </hints>
   </connection>
@@ -1960,12 +1973,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>485</y>
+     <x>167</x>
+     <y>520</y>
     </hint>
     <hint type="destinationlabel">
-     <x>172</x>
-     <y>564</y>
+     <x>175</x>
+     <y>619</y>
     </hint>
    </hints>
   </connection>
@@ -1976,12 +1989,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>95</x>
-     <y>611</y>
+     <x>105</x>
+     <y>668</y>
     </hint>
     <hint type="destinationlabel">
-     <x>249</x>
-     <y>611</y>
+     <x>254</x>
+     <y>668</y>
     </hint>
    </hints>
   </connection>
@@ -1992,8 +2005,8 @@
    <slot>loadProject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>127</x>
-     <y>417</y>
+     <x>120</x>
+     <y>88</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -2008,8 +2021,8 @@
    <slot>saveProject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>383</y>
+     <x>120</x>
+     <y>88</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -2018,18 +2031,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>comboBox</sender>
+   <sender>zoomLevel</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>widget</receiver>
    <slot>rescale(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>822</x>
-     <y>93</y>
+     <x>823</x>
+     <y>92</y>
     </hint>
     <hint type="destinationlabel">
-     <x>274</x>
-     <y>102</y>
+     <x>273</x>
+     <y>99</y>
     </hint>
    </hints>
   </connection>
@@ -2040,8 +2053,8 @@
    <slot>bitDepthChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>175</y>
+     <x>120</x>
+     <y>94</y>
     </hint>
     <hint type="destinationlabel">
      <x>0</x>
@@ -2056,8 +2069,8 @@
    <slot>changeFontColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>249</y>
+     <x>131</x>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>-67</x>
@@ -2072,8 +2085,8 @@
    <slot>changeBkgColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>249</y>
+     <x>131</x>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
      <x>-8</x>
@@ -2177,6 +2190,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action100</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoom100()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action200</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoom200()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action400</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoom400()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action800</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoom800()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>updateWidth(int)</slot>
@@ -2192,5 +2269,9 @@
   <slot>bitDepthChanged(int)</slot>
   <slot>changeFontColor()</slot>
   <slot>changeBkgColor()</slot>
+  <slot>zoom100()</slot>
+  <slot>zoom200()</slot>
+  <slot>zoom400()</slot>
+  <slot>zoom800()</slot>
  </slots>
 </ui>

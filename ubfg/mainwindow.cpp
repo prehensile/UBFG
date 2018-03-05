@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    ui->statusBar->showMessage("2.0 / © KomSoft Oprogramowanie 2015-2018");
+
     connect(ui->listOfFonts, &QListWidget::currentRowChanged, [=](int currentRow){
         ui->pushButtonUpd->setEnabled(currentRow!=-1);
         ui->pushButtonRem->setEnabled(currentRow!=-1);
@@ -149,6 +151,7 @@ void MainWindow::readSettings()
     projectDir = settings.value("projectDir", QDir::homePath()).toString();
     homeDir = settings.value("homeDir", QDir::homePath()).toString();
     outFile = settings.value("outFile", ui->outFile->text()).toString();
+    ui->outDir->setText(settings.value("outDir", ui->outDir->text()).toString());
     project = settings.value("project", "project.bfg").toString();
 
     // last used:
@@ -159,6 +162,7 @@ void MainWindow::readSettings()
     ui->borderRight->setValue(settings.value("setup/borderRight", ui->borderRight->value()).toInt());
     ui->borderBottom->setValue(settings.value("setup/borderBottom", ui->borderBottom->value()).toInt());
     ui->enableDebug->setChecked(settings.value("setup/enableDebug", false).toBool());
+    ui->zoomLevel->setCurrentIndex(settings.value("setup/zoom", ui->zoomLevel->currentIndex()).toInt());
 
     settings.endGroup();
 }
@@ -173,6 +177,7 @@ void MainWindow::writeSettings()
     settings.setValue("projectDir", projectDir);
     settings.setValue("homeDir", homeDir);
     settings.setValue("outFile", outFile);
+    settings.setValue("outDir", ui->outDir->text());
 
     // last used:
     settings.setValue("setup/charList", ui->plainTextEdit->toPlainText());
@@ -182,6 +187,7 @@ void MainWindow::writeSettings()
     settings.setValue("setup/borderRight", ui->borderRight->value());
     settings.setValue("setup/borderBottom", ui->borderBottom->value());
     settings.setValue("setup/enableDebug", ui->enableDebug->isChecked());
+    settings.setValue("setup/zoom", ui->zoomLevel->currentIndex());
 
     settings.endGroup();
 }

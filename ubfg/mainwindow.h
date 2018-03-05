@@ -56,6 +56,10 @@ private Q_SLOTS:
     void bitDepthChanged(int index);
     void changeFontColor();
     void changeBkgColor();
+    void zoom100() { ui->zoomLevel->setCurrentIndex(0); }
+    void zoom200() { ui->zoomLevel->setCurrentIndex(1); }
+    void zoom400() { ui->zoomLevel->setCurrentIndex(2); }
+    void zoom800() { ui->zoomLevel->setCurrentIndex(3); }
 };
 
 #endif // MAINWINDOW_H

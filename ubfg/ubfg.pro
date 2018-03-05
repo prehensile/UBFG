@@ -1,4 +1,5 @@
 TARGET = UBFG
+CONFIG += ftgl_no_freetype
 
 TOP = ..
 include("../UBFG.pri")
@@ -39,13 +40,9 @@ HEADERS += mainwindow.h \
     sdf.h \
     maxrects.h \
     watcher.h
-SOURCES += \
-    $$COMMON_ROOT/SingleFile/freetype/FreeTypeAmalgam.c $$COMMON_ROOT/SingleFile/freetype/FreeTypeQtFile.cpp
 
 include("$$DEVTOOLS_ROOT/font_tools/font2img-tools/freetypegl/freetype-gl/_freetype-gl-dist/freetype-gl.pri")
 include("../third/qctemplatelib/qctemplatelib.pri")
-
-INCLUDEPATH += $$COMMON_ROOT/SingleFile/freetype
 
 FORMS += mainwindow.ui
 RESOURCES += res/res.qrc

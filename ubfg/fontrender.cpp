@@ -1,5 +1,6 @@
 #include "fontrender.h"
 #include "imagepacker.h"
+#include <QFontMetricsF>
 #include <QPainter>
 #include <QTextCodec>
 #include <QDir>
@@ -242,7 +243,7 @@ void FontRender::run()
             font.setItalic(true);
         fontRec.m_qfont = font;
         //rendering glyphs
-        QFontMetrics fontMetrics(font);
+        QFontMetricsF fontMetrics(font);
         base = fontMetrics.ascent() + fontMetrics.leading();
         for (i = 0; i < charList.size(); i++)
         {
@@ -250,11 +251,11 @@ void FontRender::run()
             if(charList.indexOf(charList.at(i), i + 1) > 0)
                 continue;
             QChar charFirst = charList.at(i);
-            QSize charSize = fontMetrics.size(0, charFirst);
-            packed_image.charWidth = fontMetrics.width(charFirst) / distanceFieldScale;
-            int firstBearing = fontMetrics.leftBearing(charFirst);
+            QSizeF charSize = fontMetrics.size(0, charFirst);
+            packed_image.charWidth = ceil(fontMetrics.width(charFirst) / distanceFieldScale);
+            qreal firstBearing = fontMetrics.leftBearing(charFirst);
             packed_image.bearing = firstBearing / distanceFieldScale;
-            width = charSize.width() - firstBearing;
+            width = charSize.width() /*- firstBearing*/;
             if(exporting && ui->exportKerning->isChecked())
             {
                 for (int j = 0; j < charList.size(); ++j)
@@ -273,7 +274,11 @@ void FontRender::run()
 
             height = charSize.height() + fontMetrics.leading();
             QImage buffer(width, height, glyphTxtrFormat);
-            buffer.fill(Qt::transparent);
+            if (!exporting && ui->enableDebug->isChecked()) {
+                QColor cl(Qt::cyan); cl.setAlphaF(0.5);
+                buffer.fill(cl);
+            } else
+                buffer.fill(Qt::transparent);
 
             packed_image.ch = charFirst;
             QPainter painter(&buffer);
@@ -281,7 +286,7 @@ void FontRender::run()
             painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
             //painter.setCompositionMode(QPainter::CompositionMode_Source);
             painter.setPen(fontColor);
-            painter.drawText(-firstBearing, base, charFirst);
+            painter.drawText(/*-firstBearing*/0, base, charFirst);
             if(distanceField)
             {
                 dfcalculate(&buffer, distanceFieldScale, exporting && ui->transparent->isEnabled() && ui->transparent->isChecked());
@@ -303,7 +308,7 @@ void FontRender::run()
     points = packer.pack(&glyphLst, ui->comboHeuristic->currentIndex(), width, height);
     QImage texture(width, height, baseTxtrFormat);
     QPainter p;
-    if (ui->transparent->isEnabled() && ui->transparent->isChecked() && bkgColor == Qt::transparent)
+    if (!exporting && ui->transparent->isEnabled() && ui->transparent->isChecked() && bkgColor == Qt::transparent)
     {
         p.begin(&texture);
         paintChecker(p, texture.rect());
@@ -373,15 +378,11 @@ void FontRender::run()
         p.begin(&texture);
         for (i = 0; i < glyphLst.size(); i++)
             p.drawImage(QPoint(glyphLst.at(i).rc.x(), glyphLst.at(i).rc.y()), glyphLst.at(i).img);
-        if (ui->enableDebug->isChecked()) {
-            QColor cl(Qt::magenta); cl.setAlphaF(0.5);
-            QPen pen(cl);
-            pen.setWidth(0);
-            // QVector<qreal> dashes{1, 2}; pen.setDashPattern(dashes);
-            p.setPen(pen);
-            for (i = 0; i < glyphLst.size(); ++i)
-                p.drawRect(glyphLst.at(i).rc);
-        }
+//         if (ui->enableOutline->isChecked()) {
+//             QColor cl(Qt::magenta); cl.setAlphaF(0.2);
+//             for (i = 0; i < glyphLst.size(); ++i)
+//                 p.fillRect(glyphLst.at(i).rc, cl);
+//         }
         p.end();  // end of drawing glyphs
         int percent = (int)(((float)packer.area / (float)width / (float)height) * 100.0f + 0.5f);
         float percent2 = (float)(((float)packer.neededArea / (float)width / (float)height) * 100.0f );

@@ -1250,13 +1250,6 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="bruteForce">
-            <property name="text">
-             <string>BRUTE-FORCE</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="updateButton">
             <property name="text">
              <string>Update</string>
@@ -1580,7 +1573,7 @@
          <number>0</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,0,0">
+         <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,0,0,0,0">
           <property name="topMargin">
            <number>0</number>
           </property>
@@ -1595,6 +1588,20 @@
            <widget class="QCheckBox" name="enableDebug">
             <property name="text">
              <string>debug</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="updateButton2">
+            <property name="text">
+             <string>Update</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
            </widget>
           </item>
@@ -1650,7 +1657,7 @@
              <x>0</x>
              <y>0</y>
              <width>550</width>
-             <height>745</height>
+             <height>740</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1853,22 +1860,6 @@
   <include location="res/res.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>bruteForce</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>bruteForce()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>151</x>
-     <y>818</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2</x>
-     <y>512</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>pushButton_4</sender>
    <signal>clicked()</signal>
@@ -2276,7 +2267,6 @@
   <slot>addFont()</slot>
   <slot>updateFont()</slot>
   <slot>removeFont()</slot>
-  <slot>bruteForce()</slot>
   <slot>getFolder()</slot>
   <slot>exportFont()</slot>
   <slot>loadProject()</slot>

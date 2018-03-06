@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->pushButtonRem->setEnabled(currentRow!=-1);
     });
 
-    ui->bruteForce->hide();
     thread = new FontRender(ui);
     thread->exporting = false;
     connect(ui->updateButton, SIGNAL(clicked()), thread, SLOT(run()));
+    connect(ui->updateButton2, SIGNAL(clicked()), thread, SLOT(run()));
     qRegisterMetaType<QImage>("QImage");
     connect(thread, SIGNAL(renderedImage(QImage)), ui->widget, SLOT(updatePixmap(QImage)));
     ui->encoding->addItem("UNICODE");
@@ -134,14 +134,6 @@ void MainWindow::exportFont()
     outFile = ui->outFile->text();
     thread->run();
 }
-void MainWindow::bruteForce()
-{
-    ui->bruteForce->setText("Please, wait...");
-
-    thread->run();
-    ui->bruteForce->setText("BRUTE-FORCE");
-}
-
 void MainWindow::readSettings()
 {
     QSettings settings("Sciprum Plus", "UBFG");

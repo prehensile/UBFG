@@ -1,8 +1,12 @@
 #include "fontview.h"
+#include <QMouseEvent>
+#include <QToolTip>
+
 
 FontView::FontView(QWidget *parent)
 {
     scale = 1;
+    setMouseTracking(true);
 }
 
 
@@ -12,6 +16,17 @@ void FontView::paintEvent(QPaintEvent * /* event */)
     painter.fillRect(rect(), Qt::magenta);
     this->setMinimumSize(texture.width()*scale, texture.height()*scale);
     painter.drawPixmap(0, 0, this->width(), this->height(), texture);
+}
+
+void FontView::mouseMoveEvent(QMouseEvent* event)
+{
+    QToolTip::showText(event->globalPos(),
+                       //  In most scenarios you will have to change these for
+                       //  the coordinate system you are working in.
+                       QString::number( event->pos().x()/scale ) + ", " +
+                       QString::number( event->pos().y()/scale ),
+                       this, rect() );
+    QWidget::mouseMoveEvent(event);  // Or whatever the base class is.
 }
 
 

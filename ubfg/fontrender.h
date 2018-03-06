@@ -16,7 +16,6 @@ public:
     ~FontRender();
     bool done;
     bool exporting;
-    bool bruteForce;
 
 signals:
     void renderedImage(const QImage &image);

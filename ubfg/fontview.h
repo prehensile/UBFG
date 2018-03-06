@@ -13,6 +13,7 @@ public:
     FontView(QWidget *parent);
 protected:
     void paintEvent(QPaintEvent *event);
+    void mouseMoveEvent(QMouseEvent* event);
 private:
     QPixmap texture;
     int scale;

@@ -48,7 +48,6 @@ private Q_SLOTS:
     void addFont();
     void updateFont();
     void removeFont();
-    void bruteForce();
     void getFolder();
     void exportFont();
     void saveProject();

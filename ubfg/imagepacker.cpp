@@ -8,69 +8,60 @@ ImagePacker::ImagePacker()
 //pack images, return list of positions
 QList<QPoint> ImagePacker::pack(QList<packedImage> *im, int heur, uint w, uint h, bool allowRotate)
 {
-    int i, j, x, y;
+    int x, y;
     QList<packedImage*> images;
-    for(i = 0; i < im->size(); i++)
+    for(int i = 0; i < im->size(); i++)
         images << &im->operator [](i);
     crop(&images);
 
     QList<QPoint> out;
 
-//    int maxRepeats = 30;
-//    if(bruteForce == false)
-//        maxRepeats = 1;
+    sort(&images);
+    out.clear();
+    missingChars = 0;
+    area = 0;
+    mergedChars = 0;
+    neededArea = 0;
 
-    //repeat trying to find best solution
-//    for (int repeat = 0; repeat < maxRepeats; ++repeat)
+    MaxRects rects;
+    MaxRectsNode mrn;
+    mrn.r = QRect(0, 0, w, h);
+    mrn.i = NULL;
+    rects.F << mrn;
+    rects.heuristic = heur;
+    rects.leftToRight = ltr;
+    rects.w = w;
+    rects.h = h;
+    QPoint pt;
+    bool t;
+    for(int i = 0; i < images.size(); i++)
     {
-        sort(&images);
-        out.clear();
-        missingChars = 0;
-        area = 0;
-        mergedChars = 0;
-        neededArea = 0;
-
-        MaxRects rects;
-        MaxRectsNode mrn;
-        mrn.r = QRect(0, 0, w, h);
-        mrn.i = NULL;
-        rects.F << mrn;
-        rects.heuristic = heur;
-        rects.leftToRight = ltr;
-        rects.w = w;
-        rects.h = h;
-        QPoint pt;
-        bool t;
-        for(i = 0; i < images.size(); i++)
+        images.at(i)->merged = false;
+        t = false;
+        for(int j = 0; j < out.size(); j++)
         {
-            images.at(i)->merged = false;
-            t = false;
-            for(j = 0; j < out.size(); j++)
+            if(compareImages(&images.at(j)->img, &images.at(i)->img, &x, &y))
             {
-                if(compareImages(&images.at(j)->img, &images.at(i)->img, &x, &y))
-                {
-                    pt = out.at(j)+QPoint(x, y);
-                    t = true;
-                    images.at(i)->merged = true;
-                    mergedChars++;
-                    break;
-                }
+                pt = out.at(j)+QPoint(x, y);
+                t = true;
+                images.at(i)->merged = true;
+                mergedChars++;
+                break;
             }
-            if(!t)
-                pt = rects.insertNode(&images.operator [](i)->img);
-            if(pt != QPoint(999999,999999))
-            {
-                if(!t)
-                    area += images.at(i)->img.width() * images.at(i)->img.height();
-            }
-            else
-                missingChars++;
-            if(!t)
-                neededArea += images.at(i)->img.width() * images.at(i)->img.height();
-            out << pt;
-            images.operator [](i)->rc = QRect(pt.x(), pt.y(), images.at(i)->rc.width(), images.at(i)->rc.height());
         }
-//        if(missingChars == 0) break;
+        if(!t)
+            pt = rects.insertNode(&images.operator [](i)->img);
+        if(pt != QPoint(999999,999999))
+        {
+            if(!t)
+                area += images.at(i)->img.width() * images.at(i)->img.height();
+        }
+        else
+            missingChars++;
+        if(!t)
+            neededArea += images.at(i)->img.width() * images.at(i)->img.height();
+        out << pt;
+        images.operator [](i)->rc = QRect(pt.x(), pt.y(), images.at(i)->rc.width(), images.at(i)->rc.height());
     }
     return out;
 }

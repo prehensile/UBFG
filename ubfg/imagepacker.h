@@ -31,7 +31,6 @@ public:
     int missingChars;
     int mergedChars;
     bool ltr, trim, merge, mergeBF;
-    bool bruteForce;
     unsigned int borderTop, borderBottom, borderLeft, borderRight;
     int neededArea;
     int sortOrder;

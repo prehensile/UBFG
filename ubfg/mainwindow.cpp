@@ -325,22 +325,36 @@ void MainWindow::bitDepthChanged(int index) {
 
 void MainWindow::changeFontColor() {
     QPalette buttonPal = ui->fontColor->palette();
-    QColor selectedColor = QColorDialog::getColor(buttonPal.brush(QPalette::Button).color(), NULL, "Font Color");
+    QColor selectedColor = QColorDialog::getColor(buttonPal.brush(QPalette::Button).color(), NULL, "Font color");
     QBrush brush(selectedColor);
     brush.setStyle(Qt::SolidPattern);
     buttonPal.setBrush(QPalette::Active, QPalette::Button, brush);
     buttonPal.setBrush(QPalette::Inactive, QPalette::Button, brush);
     buttonPal.setBrush(QPalette::Disabled, QPalette::Button, brush);
     ui->fontColor->setPalette(buttonPal);
+    ui->fontColor->update();
+}
+
+void MainWindow::changeFontOutlineColor() {
+    QPalette buttonPal = ui->fontColorOutline->palette();
+    QColor selectedColor = QColorDialog::getColor(buttonPal.brush(QPalette::Button).color(), NULL, "Font outline color");
+    QBrush brush(selectedColor);
+    brush.setStyle(Qt::SolidPattern);
+    buttonPal.setBrush(QPalette::Active, QPalette::Button, brush);
+    buttonPal.setBrush(QPalette::Inactive, QPalette::Button, brush);
+    buttonPal.setBrush(QPalette::Disabled, QPalette::Button, brush);
+    ui->fontColorOutline->setPalette(buttonPal);
+    ui->fontColorOutline->update();
 }
 
 void MainWindow::changeBkgColor() {
     QPalette buttonPal = ui->backgroundColor->palette();
-    QColor selectedColor = QColorDialog::getColor(buttonPal.brush(QPalette::Button).color(), NULL, "Font Color");
+    QColor selectedColor = QColorDialog::getColor(buttonPal.brush(QPalette::Button).color(), NULL, "Background color");
     QBrush brush(selectedColor);
     brush.setStyle(Qt::SolidPattern);
     buttonPal.setBrush(QPalette::Active, QPalette::Button, brush);
     buttonPal.setBrush(QPalette::Inactive, QPalette::Button, brush);
     buttonPal.setBrush(QPalette::Disabled, QPalette::Button, brush);
     ui->backgroundColor->setPalette(buttonPal);
+    ui->backgroundColor->update();
 }

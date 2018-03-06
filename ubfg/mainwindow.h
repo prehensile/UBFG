@@ -55,6 +55,7 @@ private Q_SLOTS:
     void loadProject();
     void bitDepthChanged(int index);
     void changeFontColor();
+    void changeFontOutlineColor();
     void changeBkgColor();
     void zoom100() { ui->zoomLevel->setCurrentIndex(0); }
     void zoom200() { ui->zoomLevel->setCurrentIndex(1); }

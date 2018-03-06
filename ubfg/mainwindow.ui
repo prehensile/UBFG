@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>843</width>
-    <height>881</height>
+    <height>882</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -234,7 +234,7 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QPushButton" name="fontColorOutline">
+           <widget class="QColorButton" name="fontColorOutline">
             <property name="palette">
              <palette>
               <active>
@@ -281,10 +281,10 @@
             <property name="text">
              <string/>
             </property>
-            <property name="default">
+            <property name="default" stdset="0">
              <bool>false</bool>
             </property>
-            <property name="flat">
+            <property name="flat" stdset="0">
              <bool>false</bool>
             </property>
            </widget>
@@ -307,7 +307,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="fontColor">
+           <widget class="QColorButton" name="fontColor">
             <property name="palette">
              <palette>
               <active>
@@ -354,22 +354,16 @@
             <property name="text">
              <string/>
             </property>
-            <property name="default">
+            <property name="default" stdset="0">
              <bool>false</bool>
             </property>
-            <property name="flat">
+            <property name="flat" stdset="0">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QPushButton" name="backgroundColor">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
+           <widget class="QColorButton" name="backgroundColor">
             <property name="palette">
              <palette>
               <active>
@@ -1656,7 +1650,7 @@
              <x>0</x>
              <y>0</y>
              <width>550</width>
-             <height>744</height>
+             <height>745</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1848,6 +1842,11 @@
     <slot>index(int)</slot>
     <slot>setIndex(int)</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>QColorButton</class>
+   <extends>QToolButton</extends>
+   <header location="global">extrawidgets.h</header>
   </customwidget>
  </customwidgets>
  <resources>
@@ -2254,6 +2253,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>fontColorOutline</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>changeFontOutlineColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>162</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>updateWidth(int)</slot>
@@ -2273,5 +2288,6 @@
   <slot>zoom200()</slot>
   <slot>zoom400()</slot>
   <slot>zoom800()</slot>
+  <slot>changeFontOutlineColor()</slot>
  </slots>
 </ui>

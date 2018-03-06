@@ -43,8 +43,8 @@ private:
             BOLD = 0x2,
             ITALIC = 0x4
         };
-        FontRec(const QString& name, int size, Metric metric, int style)
-	: m_font(name), m_size(size), m_metric(metric), m_style(style)
+        FontRec(const QString& name, int size, Metric metric, int style, int aa)
+	: m_font(name), m_size(size), m_metric(metric), m_style(style), m_aa(aa)
         {}
         inline static Metric GetMetric(const QString& postfix) {
             return (postfix == "pt") ? POINTS : PIXELS;
@@ -62,8 +62,17 @@ private:
             }
             return retVal;
         }
+        inline static int GetAALevel(const QStringList& strlst) {
+            int retVal = 1;
+            for (int i = 0; i < strlst.size(); ++i)
+            {
+                if (strlst.at(i).endsWith("sample") && strlst.at(i)[0].isDigit()) retVal = QString(strlst.at(i)[0]).toInt();
+            }
+            return retVal;
+        }
         QString m_font;
         int     m_size;
+        int     m_aa;
         Metric  m_metric;
         int     m_style;
         QFont   m_qfont;

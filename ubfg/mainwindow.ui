@@ -43,7 +43,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="icon">
@@ -805,7 +805,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinFontSize">
+           <widget class="QSpinBox" name="spinSample">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -816,7 +816,7 @@
              <number>1</number>
             </property>
             <property name="maximum">
-             <number>8</number>
+             <number>4</number>
             </property>
             <property name="value">
              <number>1</number>
@@ -829,7 +829,7 @@
          <widget class="QListWidget" name="listOfFonts">
           <item>
            <property name="text">
-            <string notr="true">Arial, 37 pt smooth</string>
+            <string notr="true">Arial, 37 pt smooth 1sample</string>
            </property>
            <property name="flags">
             <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>

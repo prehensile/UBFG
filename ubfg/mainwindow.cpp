@@ -102,7 +102,8 @@ void MainWindow::addFont()
                 ui->comboPtPx->currentText() +
                 (ui->checkFontSmoothing->isChecked()?QString(" smooth"):"") +
                 (ui->checkFontBold->isChecked()?QString(" b"):"") +
-                (ui->checkFontItalic->isChecked()?QString(" i"):"");
+                (ui->checkFontItalic->isChecked()?QString(" i"):"")+
+                (QString(" %1sample").arg(ui->spinSample->value()));
     QListWidgetItem *item = new QListWidgetItem(ui->listOfFonts);
     item->setText(s);
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEditable|Qt::ItemIsDragEnabled|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
@@ -163,6 +164,15 @@ void MainWindow::readSettings()
     ui->borderBottom->setValue(settings.value("setup/borderBottom", ui->borderBottom->value()).toInt());
     ui->enableDebug->setChecked(settings.value("setup/enableDebug", false).toBool());
     ui->zoomLevel->setCurrentIndex(settings.value("setup/zoom", ui->zoomLevel->currentIndex()).toInt());
+    ui->checkFontSmoothing->setChecked(settings.value("setup/fontSmoothing", false).toBool());
+    ui->checkFontItalic->setChecked(settings.value("setup/fontItalic", false).toBool());
+    ui->checkFontBold->setChecked(settings.value("setup/fontBold", false).toBool());
+    ui->spinSample->setValue(settings.value("setup/multisample", ui->spinSample->value()).toInt());
+
+    ui->outputFormat->setCurrentIndex(settings.value("export/outputFormat", ui->outputFormat->currentIndex()).toInt());
+    ui->outFormat->setCurrentIndex(settings.value("export/outFormat", ui->outFormat->currentIndex()).toInt());
+    ui->encoding->setCurrentIndex(settings.value("export/encoding", ui->encoding->currentIndex()).toInt());
+    ui->saveImageInside->setChecked(settings.value("export/embedImages", false).toBool());
 
     settings.endGroup();
 }
@@ -188,6 +198,15 @@ void MainWindow::writeSettings()
     settings.setValue("setup/borderBottom", ui->borderBottom->value());
     settings.setValue("setup/enableDebug", ui->enableDebug->isChecked());
     settings.setValue("setup/zoom", ui->zoomLevel->currentIndex());
+    settings.setValue("setup/fontSmoothing", ui->checkFontSmoothing->isChecked());
+    settings.setValue("setup/fontBold", ui->checkFontBold->isChecked());
+    settings.setValue("setup/fontItalic", ui->checkFontItalic->isChecked());
+    settings.setValue("setup/multisample", ui->spinSample->value());
+
+    settings.setValue("export/outputFormat", ui->outputFormat->currentIndex());
+    settings.setValue("export/outFormat", ui->outFormat->currentIndex());
+    settings.setValue("export/encoding", ui->encoding->currentIndex());
+    settings.setValue("export/embedImages", ui->saveImageInside->isChecked());
 
     settings.endGroup();
 }

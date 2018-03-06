@@ -21,9 +21,6 @@ FontRender::FontRender(Ui_MainWindow *_ui) : ui(_ui), m_checkerSize(8)
 FontRender::~FontRender()
 {}
 
-#define WIDTH  1024
-#define HEIGHT 1024
-
 struct Point
 {
     short dx, dy;
@@ -228,13 +225,13 @@ void FontRender::run()
         if(fontOptList.size() < 2)
             continue;
         // make font record and qfont
-        FontRec fontRec(fontName.at(0), fontOptList.at(0).toInt(), FontRec::GetMetric(fontOptList.at(1)), FontRec::GetStyle(fontOptList.mid(2)));
+        FontRec fontRec(fontName.at(0), fontOptList.at(0).toInt(), FontRec::GetMetric(fontOptList.at(1)), FontRec::GetStyle(fontOptList.mid(2)), FontRec::GetAALevel(fontOptList.mid(2)));
         QFont   font(fontRec.m_font);
         // set fonst size
         if (FontRec::POINTS == fontRec.m_metric)
-            font.setPointSize(fontRec.m_size * distanceFieldScale);
+            font.setPointSize(fontRec.m_size * distanceFieldScale * fontRec.m_aa);
         else
-            font.setPixelSize(fontRec.m_size * distanceFieldScale);
+            font.setPixelSize(fontRec.m_size * distanceFieldScale * fontRec.m_aa);
         // set font style
         font.setStyleStrategy(QFont::NoAntialias);
         if (fontRec.m_style & FontRec::SMOOTH)
@@ -275,20 +272,11 @@ void FontRender::run()
             }
 
             height = charSize.height() + fontMetrics.leading();
-            QImage buffer;
-            if(distanceField)
-            {
-                buffer = QImage(width, height, glyphTxtrFormat);
-                buffer.fill(Qt::transparent);
-            }
-            else
-            {
-                packed_image.img = QImage(width, height, glyphTxtrFormat);
-                packed_image.img.fill(Qt::transparent);
-            }
+            QImage buffer(width, height, glyphTxtrFormat);
+            buffer.fill(Qt::transparent);
 
             packed_image.ch = charFirst;
-            QPainter painter(distanceField ? &buffer : &packed_image.img);
+            QPainter painter(&buffer);
             painter.setFont(font);
             painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
             //painter.setCompositionMode(QPainter::CompositionMode_Source);
@@ -298,7 +286,10 @@ void FontRender::run()
             {
                 dfcalculate(&buffer, distanceFieldScale, exporting && ui->transparent->isEnabled() && ui->transparent->isChecked());
                 packed_image.img = buffer.scaled(buffer.size() / distanceFieldScale);
-            }
+            } else if (fontRec.m_aa > 1)
+                packed_image.img = buffer.scaled(buffer.size() / fontRec.m_aa, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            else
+                packed_image.img = buffer;
             packed_image.crop = packed_image.img.rect();
             // add rendered glyph
             glyphLst << packed_image;
@@ -592,7 +583,7 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
 		 "      } kerning[%ld];\n"
 		 "    } glyphs[%ld];\n"
 		 "} %s_%dp = {\n", max_kerning_count, glyph_count, base_name, font_size );
-      output << _ssprintf(
+        output << _ssprintf(
 		 " \"%s\", \"%s\", \"%s\", %d, %d, %d, %d, %d, %d, %d, %d, %ld, \n", 
 		 base_name, finfo.family().toLatin1().constData(), finfo.styleName().toLatin1().constData(),
 		 finfo.fixedPitch(),
@@ -622,20 +613,21 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
                 output << _ssprintf( "  {'%lc', ", glyph->ch.unicode() );
             else
                 output << _ssprintf( "  {0x%04x, ", glyph->ch.unicode() );
-        output << _ssprintf( "%d, %d, ", glyph->crop.width(), glyph->crop.height() );
-        output << _ssprintf( "%d, %d, ", glyph->rc.x(), glyph->rc.y() );
-        output << _ssprintf( "%d, %d, ", glyph->crop.x(), glyph->crop.y() );
-        output << _ssprintf( "%d, %d, ", glyph->charWidth, glyph->rc.height() );
+        output << glyph->crop.width() << "," << glyph->crop.height() << ", ";
+        output << glyph->rc.x() << "," << glyph->rc.y() << ", ";
+        output << glyph->crop.x() << "," << glyph->crop.y() << ", ";
+        output << glyph->charWidth << "," << glyph->rc.height() << ", ";
         const float
-        s0 = (glyph->rc.x() + glyph->crop.x()) / texture.width(),
-        t0 = (glyph->rc.y() + glyph->crop.y()) / texture.height(),
-        s1 = (glyph->rc.x() + glyph->crop.x() + glyph->crop.width()) / texture.width(),
-        t1 = (glyph->rc.y() + glyph->crop.y() + glyph->crop.height()) / texture.height();
-        output << _ssprintf( "%ff, %ff, %ff, %ff, ", s0, t0, s1, t1 );
+            s0 = (glyph->rc.x() + glyph->crop.x()) / texture.width(),
+            t0 = (glyph->rc.y() + glyph->crop.y()) / texture.height(),
+            s1 = (glyph->rc.x() + glyph->crop.x() + glyph->crop.width()) / texture.width(),
+            t1 = (glyph->rc.y() + glyph->crop.y() + glyph->crop.height()) / texture.height();
+        output << s0 << ", " << t0 << ", " << s1 << ", " << t1 << ", ";
 
         const QList<kerningPair> *kerningList = &fontRecIt->m_kerningList;
-        output << _ssprintf( "%d, ", kerningList->length() );
-        output << "{ ";
+        int kernSize = 0, kernOut = 0; for( int i=0; i < kerningList->length(); ++i )
+            if (kerningList->at(i).first == glyph->ch || kerningList->at(i).second == glyph->ch) ++kernSize;
+        output << kernSize << ", { ";
         for( int i=0; i < kerningList->length(); ++i )
         {
             if (kerningList->at(i).first == glyph->ch || kerningList->at(i).second == glyph->ch)
@@ -648,12 +640,12 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
                         output << _ssprintf( "{'%lc', %ff}", charcode, kerningList->at(i).kerning );
                     else
                         output << _ssprintf( "{0x%04x, %ff}", charcode, kerningList->at(i).kerning );
-                if( i < kerningList->length()-1)
+                if( kernOut < kernSize-1)
                     output << ", ";
+                ++kernOut;
             }
-            output << "} },\n";
         }
-        output << " }\n};\n";
+        output << " } },\n";
       }
     }
 
@@ -666,14 +658,16 @@ bool FontRender::outputFTGL(QTextStream &output, const QList<FontRec>& fontLst, 
         output << _ssprintf( " %d, %d, %d, \n", texture.width(), texture.height(), texture.depth() );
         output << " {";
         const ulong texture_size = texture.byteCount();
+        const uchar *bits = texture.constBits();
+        qDebug() << "Exporting texture:" << texture_size << "bytes";
         for( int i=0; i < texture_size; i+= 32 )
         {
-            for( int j=0; j < 32 && (j+i) < texture_size ; ++ j)
+            for( int j=0; j < 32 && (j+i) < texture_size ; ++j)
             {
                 if( (j+i) < (texture_size-1) )
-                    output << _ssprintf( "%d,", texture.bits()[i+j] );
-                else
-                    output << _ssprintf( "%d", texture.bits()[i+j] );
+                    output << bits[i+j] << ",";
+                else if( (j+i) == (texture_size-1) )
+                    output << bits[i+j];
             }
             if( (i+32) < texture_size )
                 output << "\n  ";
